@@ -1,8 +1,12 @@
+import os
+import shutil
 import hashlib
 import tkinter as gui
+
 from tkinter import filedialog as fd
 
 # == Vars
+SEKIRO_SAVE_LOCATION = os.getenv('APPDATA') + '/Roaming/Sekiro/'
 
 LARGE_FONT = ("Verdana", 16)
 NORM_FONT  = ("Helvetica", 10)
@@ -128,8 +132,10 @@ def transferSave():
     new_save_file.close()
 
     if save_overwrite == 1:
-        return popup('Not working rn.')
-    
+        current_save = SEKIRO_SAVE_LOCATION + os.listdir(SEKIRO_SAVE_LOCATION)[0] + '/S0000.sl2'
+        os.remove(current_save)
+        shutil.copy2(new_save_file.name, current_save)
+
     popup(
         "Completed character transfer from: \n'" + source_save + "' => '" + target_save + "'\n"
         + "Sekiro save file overwritten!" if save_overwrite == 1 else "Save can be found at: " + save_file,
