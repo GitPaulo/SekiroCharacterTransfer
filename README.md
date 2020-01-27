@@ -1,2 +1,4 @@
 # SekiroCharacterTransfer
-A simple tool to transfer sekiro character save data between saves.
+A simple GUI tool to transfer Sekiro character save data between saves.
+
+Built for the Steam version of Sekiro.

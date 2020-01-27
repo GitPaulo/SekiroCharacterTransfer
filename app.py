@@ -4,7 +4,7 @@ from tkinter import filedialog as fd
 
 # == Vars
 
-LARGE_FONT = ("Verdana", 12)
+LARGE_FONT = ("Verdana", 16)
 NORM_FONT  = ("Helvetica", 10)
 SMALL_FONT = ("Helvetica", 8)
 
@@ -44,9 +44,9 @@ def center(win):
     win.geometry('{}x{}+{}+{}'.format(width, height, x, y))
     win.deiconify()
 
-def popup(msg):
+def popup(msg, title='Error'):
     popup = gui.Tk()
-    popup.wm_title("Error")
+    popup.wm_title(title)
     
     label = gui.Label(popup, text=msg, font=NORM_FONT)
     label.pack(side="top", pady=15, padx=15)
@@ -74,13 +74,13 @@ def requestSourceSave():
     global source_save 
     source_save = openSave()
     source_text.delete(1.0, gui.END)
-    source_text.insert(gui.END, source_save)
+    source_text.insert(gui.END, source_save or '<no file opened>')
 
 def requestTargetSave():
     global target_save 
     target_save = openSave()
     target_text.delete(1.0, gui.END)
-    target_text.insert(gui.END, target_save)
+    target_text.insert(gui.END, target_save or '<no file opened>')
 
 def transferSave():
     if not source_save:
@@ -122,14 +122,20 @@ def transferSave():
     if original_length != len(target_data):
         return popup('Something went wrong?\n' + original_length + ' and ' + len(target_data))
 
+    # New Save
+    new_save_file = open("new_save.sl2", "wb")
+    new_save_file.write(bytes.fromhex(target_data))
+    new_save_file.close()
+
     if save_overwrite == 1:
         return popup('Not working rn.')
-    else:
-        save_file = open("new_save.sl2", "w")
-        n = save_file.write(target_data)
-        save_file.close()
+    
+    popup(
+        "Completed character transfer from: \n'" + source_save + "' => '" + target_save + "'\n"
+        + "Sekiro save file overwritten!" if save_overwrite == 1 else "Save can be found at: " + save_file,
+        'Transfer Completed!'
+    )
 
-    print('Done!')
 
 # == Main Logic
 
@@ -142,27 +148,28 @@ label.pack()
 source_button = gui.Button(window, text="Character Save", fg="blue", command=requestSourceSave)
 source_button.pack()
 
-source_text = gui.Text(window, height=1, width=25)
-source_text.insert(gui.END, '<open a file>')
+source_text = gui.Text(window, height=1, width=30)
+source_text.insert(gui.END, '<no file selected>')
 source_text.pack(pady=15)
 
 target_button = gui.Button(window, text="Destination Save", fg="blue", command=requestTargetSave)
 target_button.pack()
 
-target_text = gui.Text(window, height=1, width=25)
-target_text.insert(gui.END, '<open a file>')
+target_text = gui.Text(window, height=1, width=30)
+target_text.insert(gui.END, '<no file selected>')
 target_text.pack(pady=15) 
 
 save_overwrite  = gui.IntVar()
-overwrite_check = gui.Checkbutton(window, text="Overwrite current sekiro save?", variable=save_overwrite, onvalue = 1, offvalue = 0)
+overwrite_check = gui.Checkbutton(window, text="Overwrite current sekiro save?", variable=save_overwrite, onvalue=1, offvalue=0)
 overwrite_check.pack(pady=5)
 
-steamid_copy  = gui.IntVar()
-steamid_check = gui.Checkbutton(window, text="Transfer steam id?", variable=steamid_copy, onvalue = 1, offvalue = 0)
+steamid_copy  = gui.IntVar(value=1)
+steamid_check = gui.Checkbutton(window, text="Transfer steam id?", variable=steamid_copy, onvalue=1, offvalue=0)
 steamid_check.pack()
 
 transfer_button = gui.Button(window, text="Transfer", fg="green", command=transferSave)
 transfer_button.pack(pady=15)
 
 center(window)
+window.tk.call('wm', 'iconphoto', window._w, gui.PhotoImage(file='./assets/sicon.png'))
 window.mainloop()
